@@ -4,5 +4,13 @@
 
 Sometimes you just want to run `showali my_alignment.fasta` and see your sequences.
 
-That's pretty much it. 
-WIP
+## How to install
+
+```bash
+git clone git@github.com:kirilenkobm/showali.git
+cd showali
+make
+# add bin/showali to your path, enjoy!
+```
+
+That's pretty much it.
