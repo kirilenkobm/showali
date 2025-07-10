@@ -4,6 +4,9 @@
 
 Sometimes you just want to run `showali my_alignment.fasta` and see your sequences.
 
+![Screenshot](pics/v0.1.5.screenshot.png)
+*v0.1.5 screenshot*
+
 ## How to install
 
 ```bash
