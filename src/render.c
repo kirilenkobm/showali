@@ -72,7 +72,16 @@ void render_frame(ViewState *vs) {
     if (vs->jump_mode) {
         printf("Jump to position: %s", vs->jump_buffer);
     } else {
-        printf("(Q) Quit (H) Help (A) About (J) Jump  (← ↑ ↓ →) Navigate");
+        // find the maximum sequence length
+        int max_seq_len = 0;
+        for (size_t i = 0; i < vs->seqs->count; i++) {
+            if ((int)vs->seqs->items[i].len > max_seq_len) {
+                max_seq_len = (int)vs->seqs->items[i].len;
+            }
+        }
+        
+        printf("(Q) Quit (H) Help (A) About (J) Jump  (← ↑ ↓ →) Navigate  Pos:%d/%d", 
+               vs->col_offset + 1, max_seq_len);
     }
 
     fflush(stdout);

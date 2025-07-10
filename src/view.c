@@ -14,7 +14,7 @@ ViewState view_init(SeqList *s) {
 void view_resize(ViewState *vs) {
     get_term_size(&vs->rows, &vs->cols);
     // clamp row_offset so we never drop the first line
-    int content = vs->rows - 2;
+    int content = vs->rows - 2;  // underscores + status
     int max_row_off = vs->seqs->count - content;
     if (max_row_off < 0) max_row_off = 0;
     if (vs->row_offset > max_row_off) vs->row_offset = max_row_off;
@@ -29,7 +29,7 @@ void view_resize(ViewState *vs) {
 
 // vertical scroll
 void view_scroll_down(ViewState *vs) {
-    int content = vs->rows - 2; 
+    int content = vs->rows - 2;  // underscores + status
     int max_off = vs->seqs->count - content;
     if (vs->row_offset < max_off) vs->row_offset++;
 }
