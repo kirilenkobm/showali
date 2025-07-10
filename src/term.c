@@ -1,4 +1,5 @@
 #include "term.h"
+#include <stdio.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -35,10 +36,12 @@ void disable_raw_mode(void) {
 }
 
 void enable_altscreen(void)  {
-    write(STDOUT_FILENO, "\x1b[?1049h\x1b[?25l", 12);
+    printf("\x1b[?1049h\x1b[?25l");
+    fflush(stdout);
 }
 void disable_altscreen(void) {
-    write(STDOUT_FILENO, "\x1b[?25h\x1b[?1049l", 12);
+    printf("\x1b[?25h\x1b[?1049l\x1b[2J\x1b[H");
+    fflush(stdout);  // ensure cleanup commands are sent
 }
 
 void get_term_size(int *rows, int *cols) {

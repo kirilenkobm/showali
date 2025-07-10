@@ -9,7 +9,7 @@ static int bg_for(char c) {
       case 'T': return 41;  // red
       case 'C': return 44;  // blue
       case 'G': return 43;  // yellow
-      default:  return 40;  // black
+      default:  return 100; // grey
     }
 }
 
@@ -51,7 +51,7 @@ void render_frame(ViewState *vs) {
         printf("| ");
 
         // show sequence using remaining available space
-        int avail = vs->cols - id_width - 8;  // subtract ID width, "| ", and extra large safety margin
+        int avail = vs->cols - id_width - 2;  // subtract ID width and "| " separator
         if (avail < 0) avail = 0;  // ensure non-negative
         if (avail > 0) {
             int chars_printed = 0;
