@@ -1,0 +1,5 @@
+This is not a FASTA file.
+It contains random text.
+Some numbers: 123456
+Special characters: !@#$%^&*()
+No proper FASTA headers or sequences here. 

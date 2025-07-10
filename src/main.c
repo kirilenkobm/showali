@@ -39,6 +39,10 @@ int main(int argc, char **argv) {
 
     // 1) load sequences
     SeqList *seqs = parse_fasta(argv[1]);
+    if (!seqs) {
+        fprintf(stderr, "Failed to parse FASTA file '%s'\n", argv[1]);
+        return 1;
+    }
 
     // 2) init terminal (alt-screen, raw mode, SIGWINCH)
     enable_raw_mode();
