@@ -54,12 +54,28 @@ int main(int argc, char **argv) {
         InputEvt ev = input_read();
         switch (ev.type) {
             case EVT_KEY:
-                if (ev.key == 'q' || ev.key == 'Q') running = false;
-                else if (ev.key == ARROW_UP)          view_scroll_up(&vs);
-                else if (ev.key == ARROW_DOWN)        view_scroll_down(&vs);
-                else if (ev.key == ARROW_LEFT)        view_scroll_left(&vs);
-                else if (ev.key == ARROW_RIGHT)       view_scroll_right(&vs);
-                // H/A do nothing for now
+                if (vs.jump_mode) {
+                    // In jump mode, handle digits and Enter
+                    if (ev.key == ENTER) {
+                        view_execute_jump(&vs);
+                    } else if (ev.key >= '0' && ev.key <= '9') {
+                        view_add_jump_digit(&vs, ev.key);
+                    } else if (ev.key == 'q' || ev.key == 'Q') {
+                        running = false;
+                    } else {
+                        // Any other key cancels jump mode
+                        view_cancel_jump(&vs);
+                    }
+                } else {
+                    // Normal mode
+                    if (ev.key == 'q' || ev.key == 'Q') running = false;
+                    else if (ev.key == 'j' || ev.key == 'J') view_start_jump(&vs);
+                    else if (ev.key == ARROW_UP)          view_scroll_up(&vs);
+                    else if (ev.key == ARROW_DOWN)        view_scroll_down(&vs);
+                    else if (ev.key == ARROW_LEFT)        view_scroll_left(&vs);
+                    else if (ev.key == ARROW_RIGHT)       view_scroll_right(&vs);
+                    // H/A do nothing for now
+                }
                 break;
             case EVT_RESIZE:
                 view_resize(&vs);

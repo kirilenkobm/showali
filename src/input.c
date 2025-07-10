@@ -18,6 +18,7 @@ InputEvt input_read(void) {
         read(STDIN_FILENO, &c, 1);
         switch (c) {
             case 'q': case 'Q': return (InputEvt){.type=EVT_KEY, .key=c};
+            case '\r': case '\n': return (InputEvt){.type=EVT_KEY, .key=ENTER};
             case '\x1b': {
                 char seq[2];
                 if (read(STDIN_FILENO, &seq[0], 1)==1 &&

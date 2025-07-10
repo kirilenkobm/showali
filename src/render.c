@@ -69,7 +69,11 @@ void render_frame(ViewState *vs) {
     putchar('\n');
 
     // draw status on the last line
-    printf("(Q) Quit (H) Help (A) About  (← ↑ ↓ →) Navigate");
+    if (vs->jump_mode) {
+        printf("Jump to position: %s", vs->jump_buffer);
+    } else {
+        printf("(Q) Quit (H) Help (A) About (J) Jump  (← ↑ ↓ →) Navigate");
+    }
 
     fflush(stdout);
 }
