@@ -2,7 +2,7 @@
 #include <string.h>
 #include "render.h"
 
-// simple DNA -> ANSI bg color mapper
+// map bases -> ANSI background codes
 static int bg_for(char c) {
     switch (c) {
       case 'A': return 42;  // green
@@ -14,30 +14,40 @@ static int bg_for(char c) {
 }
 
 void render_frame(ViewState *vs) {
-    // full clear + home
+    // re-hide cursor in case anything unhid it
+    printf("\x1b[?25l");
+    // clear screen + move cursor home
     printf("\x1b[2J\x1b[H");
 
-    int content = vs->rows - 2;
+    int content = vs->rows - 2;  // leave 2 lines for status
     for (int line = 0; line < content; line++) {
-        size_t idx = vs->row_offset + line;
-        if (idx < vs->seqs->count) {
-            Sequence *s = &vs->seqs->items[idx];
-            // strip newline from ID
-            size_t idlen = strcspn(s->id, "\n");
-            printf("%.*s| ", (int)idlen, s->id);
+        int idx = vs->row_offset + line;
+        if (idx >= (int)vs->seqs->count) {
+            putchar('\n');
+            continue;
+        }
 
-            // how many cols left?
-            int avail = vs->cols - idlen - 3;
-            for (int i = vs->col_offset; i < (int)s->len && i < vs->col_offset + avail; i++) {
-                int bg = bg_for(s->seq[i]);
-                printf("\x1b[%dm%c\x1b[0m", bg, s->seq[i]);
-            }
+        Sequence *s = &vs->seqs->items[idx];
+        // print ID (up to newline)
+        size_t idlen = strcspn(s->id, "\n");
+        printf("%.*s| ", (int)idlen, s->id);
+
+        // how many bases fit after “ID| ”
+        int avail = vs->cols - (int)idlen - 3;
+        for (int i = vs->col_offset; i < (int)s->len && i < vs->col_offset + avail; i++) {
+            int bg = bg_for(s->seq[i]);
+            printf("\x1b[%dm%c\x1b[0m", bg, s->seq[i]);
         }
         putchar('\n');
     }
 
-    // status bar
+    // draw underscores on the second-to-last line
+    printf("\x1b[%d;1H", vs->rows - 1);
     for (int i = 0; i < vs->cols; i++) putchar('_');
-    printf("\n(Q) Quit (H) Help (A) About  (← ↑ ↓ →) Navigate\n");
+
+    // draw status on the last line
+    printf("\x1b[%d;1H", vs->rows);
+    printf("(Q) Quit (H) Help (A) About  (← ↑ ↓ →) Navigate\n");
+
     fflush(stdout);
 }

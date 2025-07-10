@@ -1,13 +1,18 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include "input.h"
+#include "term.h"
 
 InputEvt input_read(void) {
+    if (was_resized()) {
+        return (InputEvt){ .type = EVT_RESIZE };
+    }
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(STDIN_FILENO, &rfds);
     struct timeval tv = { .tv_sec = 1, .tv_usec = 0 };
     int n = select(STDIN_FILENO+1, &rfds, NULL, NULL, &tv);
+
     if (n > 0 && FD_ISSET(STDIN_FILENO, &rfds)) {
         char c;
         read(STDIN_FILENO, &c, 1);
