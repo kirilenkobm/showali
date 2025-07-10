@@ -42,12 +42,11 @@ void render_frame(ViewState *vs) {
     }
 
     // draw underscores on the second-to-last line
-    printf("\x1b[%d;1H", vs->rows - 1);
     for (int i = 0; i < vs->cols; i++) putchar('_');
+    putchar('\n');
 
     // draw status on the last line
-    printf("\x1b[%d;1H", vs->rows);
-    printf("(Q) Quit (H) Help (A) About  (← ↑ ↓ →) Navigate\n");
+    printf("(Q) Quit (H) Help (A) About  (← ↑ ↓ →) Navigate");
 
     fflush(stdout);
 }
