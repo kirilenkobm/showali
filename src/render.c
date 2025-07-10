@@ -28,15 +28,38 @@ void render_frame(ViewState *vs) {
         }
 
         Sequence *s = &vs->seqs->items[idx];
-        // print ID (up to newline)
+        // print ID with fixed width of 16 characters
         size_t idlen = strcspn(s->id, "\n");
-        printf("%.*s| ", (int)idlen, s->id);
+        int id_width = 16;
+        
+        // Print ID with exactly 16 characters, replacing tabs/whitespace with spaces
+        int chars_printed = 0;
+        for (int i = 0; i < (int)idlen && chars_printed < id_width; i++) {
+            char c = s->id[i];
+            // Replace tabs and other whitespace with spaces
+            if (c == '\t' || c == '\r' || c == '\v' || c == '\f') {
+                putchar(' ');
+            } else {
+                putchar(c);
+            }
+            chars_printed++;
+        }
+        // Pad with spaces to reach exactly 16 characters
+        for (int pad = chars_printed; pad < id_width; pad++) {
+            putchar(' ');
+        }
+        printf("| ");
 
-        // how many bases fit after “ID| ”
-        int avail = vs->cols - (int)idlen - 3;
-        for (int i = vs->col_offset; i < (int)s->len && i < vs->col_offset + avail; i++) {
-            int bg = bg_for(s->seq[i]);
-            printf("\x1b[%dm%c\x1b[0m", bg, s->seq[i]);
+        // show sequence using remaining available space
+        int avail = vs->cols - id_width - 8;  // subtract ID width, "| ", and extra large safety margin
+        if (avail < 0) avail = 0;  // ensure non-negative
+        if (avail > 0) {
+            int chars_printed = 0;
+            for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
+                int bg = bg_for(s->seq[i]);
+                printf("\x1b[%dm%c\x1b[0m", bg, s->seq[i]);
+                chars_printed++;
+            }
         }
         putchar('\n');
     }

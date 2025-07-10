@@ -44,5 +44,9 @@ void disable_altscreen(void) {
 void get_term_size(int *rows, int *cols) {
     struct winsize ws;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-    *rows = ws.ws_row; *cols = ws.ws_col;
+    *rows = ws.ws_row; 
+    *cols = ws.ws_col;
+    
+    // Enforce minimum terminal width of 24
+    if (*cols < 24) *cols = 24;
 }
