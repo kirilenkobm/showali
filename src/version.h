@@ -1,11 +1,15 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define VERSION_MAJOR 1
+#define VERSION_MAJOR 0
 #define VERSION_MINOR 0
-#define VERSION_PATCH 0
+#define VERSION_PATCH 1
 
-#define VERSION_STRING "0.0.1"
+// Build version string from components
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define VERSION_STRING TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH)
+
 #define VERSION_BUILD __DATE__ " " __TIME__
 
 // Numeric version for comparisons
