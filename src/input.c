@@ -10,8 +10,7 @@ InputEvt input_read(void) {
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(STDIN_FILENO, &rfds);
-    struct timeval tv = { .tv_sec = 1, .tv_usec = 0 };
-    int n = select(STDIN_FILENO+1, &rfds, NULL, NULL, &tv);
+    int n = select(STDIN_FILENO+1, &rfds, NULL, NULL, NULL);
 
     if (n > 0 && FD_ISSET(STDIN_FILENO, &rfds)) {
         char c;

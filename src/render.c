@@ -16,14 +16,14 @@ static int bg_for(char c) {
 void render_frame(ViewState *vs) {
     // re-hide cursor in case anything unhid it
     printf("\x1b[?25l");
-    // clear screen + move cursor home
-    printf("\x1b[2J\x1b[H");
+    // move cursor home without clearing screen
+    printf("\x1b[H");
 
     int content = vs->rows - 2;  // leave 2 lines for status
     for (int line = 0; line < content; line++) {
         int idx = vs->row_offset + line;
         if (idx >= (int)vs->seqs->count) {
-            putchar('\n');
+            printf("\x1b[K\n");  // clear to end of line for empty rows
             continue;
         }
 
@@ -55,18 +55,26 @@ void render_frame(ViewState *vs) {
         if (avail < 0) avail = 0;  // ensure non-negative
         if (avail > 0) {
             int chars_printed = 0;
+            int current_bg = -1;  // track current background color
             for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
                 int bg = bg_for(s->seq[i]);
-                printf("\x1b[%dm%c\x1b[0m", bg, s->seq[i]);
+                if (bg != current_bg) {
+                    printf("\x1b[%dm", bg);
+                    current_bg = bg;
+                }
+                putchar(s->seq[i]);
                 chars_printed++;
             }
+            if (current_bg != -1) {
+                printf("\x1b[0m");  // reset color at end of sequence
+            }
         }
-        putchar('\n');
+        printf("\x1b[K\n");  // clear to end of line and newline
     }
 
     // draw underscores on the second-to-last line
     for (int i = 0; i < vs->cols; i++) putchar('_');
-    putchar('\n');
+    printf("\x1b[K\n");  // clear to end of line
 
     // draw status on the last line
     if (vs->jump_mode) {
@@ -83,6 +91,7 @@ void render_frame(ViewState *vs) {
         printf("(Q) Quit (H) Help (A) About (J) Jump  (← ↑ ↓ →) Navigate  Pos:%d/%d", 
                vs->col_offset + 1, max_seq_len);
     }
+    printf("\x1b[K");  // clear to end of line for status
 
     fflush(stdout);
 }
