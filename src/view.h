@@ -12,6 +12,7 @@ typedef struct {
     bool     jump_mode;  // true when collecting jump position
     char     jump_buffer[16]; // buffer for collecting jump digits
     int      jump_pos;   // current position in jump buffer
+    bool     no_color;   // true when colors should be disabled
     
     // Acceleration state
     int      last_key;   // last key pressed (for detecting repeats)

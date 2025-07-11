@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
         printf("Options:\n");
         printf("  -v, --version    Show version information\n");
         printf("  -h, --help       Show this help message\n");
+        printf("  -n, --no-color   Disable ANSI color codes\n");
         printf("\nControls:\n");
         printf("  Arrow keys       Navigate (hold for acceleration)\n");
         printf("  WASD             Navigate (jump half-screen)\n");
@@ -33,16 +34,34 @@ int main(int argc, char **argv) {
         return 0;
     }
     
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <file.fasta>\n", argv[0]);
+    // Parse arguments
+    bool no_color = false;
+    char *filename = NULL;
+    
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--no-color") == 0 || strcmp(argv[i], "-n") == 0) {
+            no_color = true;
+        } else if (filename == NULL) {
+            filename = argv[i];
+        } else {
+            fprintf(stderr, "Error: Too many arguments\n");
+            fprintf(stderr, "Usage: %s [options] <file.fasta>\n", argv[0]);
+            fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
+            return 1;
+        }
+    }
+    
+    if (filename == NULL) {
+        fprintf(stderr, "Error: No input file specified\n");
+        fprintf(stderr, "Usage: %s [options] <file.fasta>\n", argv[0]);
         fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
         return 1;
     }
 
     // 1) load sequences
-    SeqList *seqs = parse_fasta(argv[1]);
+    SeqList *seqs = parse_fasta(filename);
     if (!seqs) {
-        fprintf(stderr, "Failed to parse FASTA file '%s'\n", argv[1]);
+        fprintf(stderr, "Failed to parse FASTA file '%s'\n", filename);
         return 1;
     }
 
@@ -52,6 +71,7 @@ int main(int argc, char **argv) {
 
     // 3) init view state
     ViewState vs = view_init(seqs);
+    vs.no_color = no_color;
 
     // 4) main loop
     bool running = true;

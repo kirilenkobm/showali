@@ -32,8 +32,9 @@ make
 1. **Additional formats support & auto-detect**  
    Add parsers for `.aln`, `.phy` and `.maf` (and others) with automatic format detection.
 
-2. **`--no-color` option**  
-   Disable ANSI color codes (for scripting and clean screenshots).
+2. ~~**`--no-color` option**~~
+
+   ~~Disable ANSI color codes (for scripting and clean screenshots).~~
 
 3. ~~**WASD navigation (fast scroll)**~~
 

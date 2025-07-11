@@ -11,6 +11,7 @@ ViewState view_init(SeqList *s) {
         .col_offset = 0, 
         .jump_mode = false, 
         .jump_pos = 0,
+        .no_color = false,
         .last_key = 0,
         .repeat_count = 0,
         .accel_step = 1

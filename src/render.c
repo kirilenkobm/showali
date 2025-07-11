@@ -116,15 +116,17 @@ void render_frame(ViewState *vs) {
             int chars_printed = 0;
             int current_bg = -1;  // track current background color
             for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
-                int bg = bg_for_sequence(s->seq[i], s->type);
-                if (bg != current_bg) {
-                    printf("\x1b[%dm", bg);
-                    current_bg = bg;
+                if (!vs->no_color) {
+                    int bg = bg_for_sequence(s->seq[i], s->type);
+                    if (bg != current_bg) {
+                        printf("\x1b[%dm", bg);
+                        current_bg = bg;
+                    }
                 }
                 putchar(s->seq[i]);
                 chars_printed++;
             }
-            if (current_bg != -1) {
+            if (current_bg != -1 && !vs->no_color) {
                 printf("\x1b[0m");  // reset color at end of sequence
             }
         }
