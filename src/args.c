@@ -51,19 +51,19 @@ Args parse_args(int argc, char **argv) {
 void show_help(const char *program_name) {
     printf("Usage: %s [options] <alignment_file>\n", program_name);
     printf("Options:\n");
-    printf("  -v, --version    Show version information\n");
-    printf("  -h, --help       Show this help message\n");
-    printf("  -n, --no-color   Disable ANSI color codes\n");
+    printf("  -v, --version      Show version information\n");
+    printf("  -h, --help         Show this help message\n");
+    printf("  -n, --no-color     Disable ANSI color codes\n");
     printf("\nControls:\n");
-    printf("  Arrow keys       Navigate (hold for acceleration)\n");
-    printf("  WASD             Navigate (jump half-screen)\n");
-    printf("  Q                Quit\n");
-    printf("  J                Jump to position\n");
-    printf("  F                Find (beta)\n");
-    printf("  Mouse            Drag to select rectangular area\n");
-    printf("  Right-click      Copy selection to clipboard\n");
-    printf("  ESC              Clear selection\n");
-    printf("                       \n");
+    printf("  Arrow keys         Navigate (hold for acceleration)\n");
+    printf("  WASD               Navigate (jump half-screen)\n");
+    printf("  Q                  Quit\n");
+    printf("  J                  Jump to position\n");
+    printf("  F                  Find\n");
+    printf("  Mouse              Drag to select rectangular area\n");
+    printf("  Right-click or C   Copy selection to clipboard\n");
+    printf("  ESC                Clear selection\n");
+    printf("                        \n");
     printf("Made in Berlin by Krlnk\n");
 }
 
@@ -76,4 +76,4 @@ void show_version(void) {
 void free_args(Args *args) {
     // Currently no dynamic memory to free, but keeping for future extensibility
     (void)args;
-} 
+}
