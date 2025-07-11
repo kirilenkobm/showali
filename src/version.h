@@ -19,4 +19,4 @@
 #define PROGRAM_NAME "showali"
 #define PROGRAM_DESCRIPTION "TUI alignment viewer"
 
-#endif // VERSION_H 
+#endif // VERSION_H

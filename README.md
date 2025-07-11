@@ -30,7 +30,7 @@ make
 ## Future Plans
 
 1. **Additional formats support & auto-detect**  
-   Add parsers for `.aln`, `.phy` and `.maf` (and others) with automatic format detection.
+   Add parsers for `.aln`, ~~`.phy`~~ and ~~`.maf`~~ (and others) with automatic format detection.
 
 2. **`F` () command (?)**  
    Minimalistic search, for now only beta.
