@@ -23,9 +23,71 @@ static int is_sequence_line(const char *line) {
         if (c == '-' || c == 'N' || c == 'X') continue;  // Allow gaps and unknown bases
         if (c >= 'A' && c <= 'Z') continue;  // Allow amino acids/nucleotides
         if (isspace(c)) continue;  // Allow whitespace
+        if (c == '<' || c == '>' || c == '*' || c == '.') continue;  // Allow special characters
         return 0;  // Invalid character found
     }
     return 1;
+}
+
+// Helper function to detect sequence type
+static SequenceType detect_sequence_type(const char *seq, size_t len) {
+    if (len == 0) return SEQ_UNKNOWN;
+    
+    int dna_chars = 0;
+    int rna_chars = 0;
+    int total_chars = 0;
+    
+    // Count characters to determine sequence type
+    for (size_t i = 0; i < len; i++) {
+        char c = toupper(seq[i]);
+        
+        // Skip gaps, unknowns, and special characters
+        if (c == '-' || c == 'N' || c == 'X' || c == '<' || c == '>' || c == '*' || c == '.' || isspace(c)) {
+            continue;
+        }
+        
+        total_chars++;
+        
+        // Check for DNA characters
+        if (c == 'A' || c == 'T' || c == 'G' || c == 'C') {
+            dna_chars++;
+        }
+        
+        // Check for RNA characters (U instead of T)
+        if (c == 'A' || c == 'U' || c == 'G' || c == 'C') {
+            rna_chars++;
+        }
+    }
+    
+    // Need at least 4 characters to make a reliable determination
+    if (total_chars < 4) return SEQ_UNKNOWN;
+    
+    // Calculate percentages
+    double dna_pct = (double)dna_chars / total_chars;
+    double rna_pct = (double)rna_chars / total_chars;
+    
+    // If 95% or more of characters are DNA bases, it's DNA
+    if (dna_pct >= 0.95) {
+        // Check if it contains U (would make it RNA)
+        for (size_t i = 0; i < len; i++) {
+            if (toupper(seq[i]) == 'U') {
+                return SEQ_RNA;
+            }
+        }
+        return SEQ_DNA;
+    }
+    
+    // If 95% or more of characters are RNA bases and contains U, it's RNA
+    if (rna_pct >= 0.95) {
+        for (size_t i = 0; i < len; i++) {
+            if (toupper(seq[i]) == 'U') {
+                return SEQ_RNA;
+            }
+        }
+    }
+    
+    // Otherwise, assume it's protein
+    return SEQ_PROTEIN;
 }
 
 SeqList *parse_fasta(const char *path) {
@@ -74,6 +136,7 @@ SeqList *parse_fasta(const char *path) {
             cur->id = strdup(line + 1);
             cur->seq = calloc(1, MAX_SEQ);
             cur->len = 0;
+            cur->type = SEQ_UNKNOWN;  // Will be determined after sequence is complete
         } else if (cur) {
             // We have a current sequence, so this should be sequence data
             if (!is_sequence_line(line)) {
@@ -130,7 +193,7 @@ SeqList *parse_fasta(const char *path) {
         return NULL;
     }
     
-    // Check for sequences without data
+    // Check for sequences without data and detect sequence types
     for (size_t i = 0; i < sl->count; i++) {
         if (sl->items[i].len == 0) {
             fprintf(stderr, "Error: Found sequence header without sequence data\n");
@@ -139,6 +202,9 @@ SeqList *parse_fasta(const char *path) {
             free(sl);
             return NULL;
         }
+        
+        // Detect sequence type for each sequence
+        sl->items[i].type = detect_sequence_type(sl->items[i].seq, sl->items[i].len);
     }
     
     return sl;

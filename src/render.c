@@ -2,14 +2,87 @@
 #include <string.h>
 #include "render.h"
 
-// map bases -> ANSI background codes
-static int bg_for(char c) {
+// map bases -> ANSI background codes for DNA/RNA
+static int bg_for_nucleotide(char c) {
     switch (c) {
       case 'A': return 42;  // green
       case 'T': return 41;  // red
+      case 'U': return 45;  // magenta (for RNA)
       case 'C': return 44;  // blue
       case 'G': return 43;  // yellow
+      case 'N': return 100; // grey
+      case '-': return 47;  // white (gaps)
       default:  return 100; // grey
+    }
+}
+
+// map amino acids -> ANSI background codes for proteins
+// Based on standard biochemical properties and Clustal coloring scheme
+static int bg_for_amino_acid(char c) {
+    switch (c) {
+      // Small nonpolar (Ala, Gly, Pro, Val) - light colors
+      case 'A': return 47;   // white
+      case 'G': return 102;  // bright green
+      case 'P': return 103;  // bright yellow  
+      case 'V': return 47;   // white
+      
+      // Hydrophobic (Ile, Leu, Met, Phe, Trp) - warm colors
+      case 'I': return 43;   // yellow
+      case 'L': return 43;   // yellow
+      case 'M': return 43;   // yellow
+      case 'F': return 44;   // blue
+      case 'W': return 44;   // blue
+      
+      // Polar uncharged (Ser, Thr, Asn, Gln, Tyr, Cys) - greens
+      case 'S': return 42;   // green
+      case 'T': return 42;   // green
+      case 'N': return 46;   // cyan
+      case 'Q': return 46;   // cyan
+      case 'Y': return 46;   // cyan
+      case 'C': return 105;  // bright magenta
+      
+      // Positively charged (Lys, Arg, His) - red/magenta
+      case 'K': return 41;   // red
+      case 'R': return 41;   // red
+      case 'H': return 45;   // magenta
+      
+      // Negatively charged (Asp, Glu) - blue
+      case 'D': return 104;  // bright blue
+      case 'E': return 104;  // bright blue
+      
+      // Gaps and unknown
+      case '-': return 100;  // dark grey
+      case 'X': return 100;  // dark grey
+      case '*': return 101;  // bright red (stop codon)
+      
+      default:  return 100;  // dark grey
+    }
+}
+
+// Helper function to get background color based on sequence type
+static int bg_for_sequence(char c, SequenceType type) {
+    switch (type) {
+        case SEQ_DNA:
+        case SEQ_RNA:
+            return bg_for_nucleotide(c);
+        case SEQ_PROTEIN:
+            return bg_for_amino_acid(c);
+        default:
+            return 100; // grey for unknown
+    }
+}
+
+// Helper function to count sequences by type
+static void count_sequence_types(SeqList *seqs, int *dna_count, int *rna_count, int *protein_count, int *unknown_count) {
+    *dna_count = *rna_count = *protein_count = *unknown_count = 0;
+    
+    for (size_t i = 0; i < seqs->count; i++) {
+        switch (seqs->items[i].type) {
+            case SEQ_DNA: (*dna_count)++; break;
+            case SEQ_RNA: (*rna_count)++; break;
+            case SEQ_PROTEIN: (*protein_count)++; break;
+            default: (*unknown_count)++; break;
+        }
     }
 }
 
@@ -57,7 +130,7 @@ void render_frame(ViewState *vs) {
             int chars_printed = 0;
             int current_bg = -1;  // track current background color
             for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
-                int bg = bg_for(s->seq[i]);
+                int bg = bg_for_sequence(s->seq[i], s->type);
                 if (bg != current_bg) {
                     printf("\x1b[%dm", bg);
                     current_bg = bg;
@@ -88,8 +161,19 @@ void render_frame(ViewState *vs) {
             }
         }
         
-        printf("(Q) Quit (H) Help (A) About (J) Jump  (← ↑ ↓ →) Navigate  Pos:%d/%d", 
-               vs->col_offset + 1, max_seq_len);
+        // Count sequence types for display
+        int dna_count, rna_count, protein_count, unknown_count;
+        count_sequence_types(vs->seqs, &dna_count, &rna_count, &protein_count, &unknown_count);
+        
+        // Create sequence type summary
+        char type_info[100] = "";
+        if (dna_count > 0) strcat(type_info, "DNA ");
+        if (rna_count > 0) strcat(type_info, "RNA ");
+        if (protein_count > 0) strcat(type_info, "Protein ");
+        if (unknown_count > 0) strcat(type_info, "Unknown ");
+        
+        printf("(Q) Quit (J) Jump (← ↑ ↓ →) Navigate  Pos:%d/%d  [%s] %zu seqs", 
+               vs->col_offset + 1, max_seq_len, type_info, vs->seqs->count);
     }
     printf("\x1b[K");  // clear to end of line for status
 
