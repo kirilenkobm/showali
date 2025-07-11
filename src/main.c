@@ -24,8 +24,9 @@ int main(int argc, char **argv) {
         printf("  -v, --version    Show version information\n");
         printf("  -h, --help       Show this help message\n");
         printf("\nControls:\n");
-        printf("  Arrow keys       Navigate\n");
+        printf("  Arrow keys       Navigate (hold for acceleration)\n");
         printf("  Q                Quit\n");
+        printf("  J                Jump to position\n");
         printf("                       \n");
         printf("Made in Berlin by Krlnk\n");
         return 0;
@@ -55,7 +56,10 @@ int main(int argc, char **argv) {
     bool running = true;
     while (running) {
         render_frame(&vs);
-        InputEvt ev = input_read();
+        
+        // Use timeout-based input reading (30ms timeout for acceleration reset)
+        InputEvt ev = input_read_timeout(30);
+        
         switch (ev.type) {
             case EVT_KEY:
                 if (vs.jump_mode) {
@@ -71,18 +75,36 @@ int main(int argc, char **argv) {
                         view_cancel_jump(&vs);
                     }
                 } else {
-                    // Normal mode
-                    if (ev.key == 'q' || ev.key == 'Q') running = false;
-                    else if (ev.key == 'j' || ev.key == 'J') view_start_jump(&vs);
-                    else if (ev.key == ARROW_UP)          view_scroll_up(&vs);
-                    else if (ev.key == ARROW_DOWN)        view_scroll_down(&vs);
-                    else if (ev.key == ARROW_LEFT)        view_scroll_left(&vs);
-                    else if (ev.key == ARROW_RIGHT)       view_scroll_right(&vs);
-                    // H/A do nothing for now
+                    // Normal mode - handle acceleration for arrow keys
+                    if (ev.key == 'q' || ev.key == 'Q') {
+                        running = false;
+                    } else if (ev.key == 'j' || ev.key == 'J') {
+                        view_start_jump(&vs);
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == ARROW_UP) {
+                        view_update_acceleration(&vs, ARROW_UP);
+                        view_scroll_up(&vs);
+                    } else if (ev.key == ARROW_DOWN) {
+                        view_update_acceleration(&vs, ARROW_DOWN);
+                        view_scroll_down(&vs);
+                    } else if (ev.key == ARROW_LEFT) {
+                        view_update_acceleration(&vs, ARROW_LEFT);
+                        view_scroll_left(&vs);
+                    } else if (ev.key == ARROW_RIGHT) {
+                        view_update_acceleration(&vs, ARROW_RIGHT);
+                        view_scroll_right(&vs);
+                    } else {
+                        // Reset acceleration for non-arrow keys
+                        view_reset_acceleration(&vs);
+                    }
                 }
                 break;
             case EVT_RESIZE:
                 view_resize(&vs);
+                break;
+            case EVT_TIMEOUT:
+                // Reset acceleration on timeout (user stopped pressing keys)
+                view_reset_acceleration(&vs);
                 break;
             default:
                 break;

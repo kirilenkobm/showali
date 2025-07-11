@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 #include <signal.h>    // for SIGWINCH & signal()
+#include <time.h>      // for clock_gettime
 
 static struct termios orig;
 static volatile sig_atomic_t resized = 0;
@@ -52,4 +53,15 @@ void get_term_size(int *rows, int *cols) {
     
     // Enforce minimum terminal width of 24
     if (*cols < 24) *cols = 24;
+}
+
+// Timing utilities for acceleration
+void get_current_time(struct timespec *ts) {
+    clock_gettime(CLOCK_MONOTONIC, ts);
+}
+
+long time_diff_ms(struct timespec *start, struct timespec *end) {
+    long seconds = end->tv_sec - start->tv_sec;
+    long nanoseconds = end->tv_nsec - start->tv_nsec;
+    return seconds * 1000 + nanoseconds / 1000000;
 }

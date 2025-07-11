@@ -4,13 +4,33 @@
 #include "term.h"
 
 InputEvt input_read(void) {
+    return input_read_timeout(-1);  // blocking read (no timeout)
+}
+
+InputEvt input_read_timeout(int timeout_ms) {
     if (was_resized()) {
         return (InputEvt){ .type = EVT_RESIZE };
     }
+    
     fd_set rfds;
     FD_ZERO(&rfds);
     FD_SET(STDIN_FILENO, &rfds);
-    int n = select(STDIN_FILENO+1, &rfds, NULL, NULL, NULL);
+    
+    struct timeval timeout;
+    struct timeval *timeout_ptr = NULL;
+    
+    if (timeout_ms >= 0) {
+        timeout.tv_sec = timeout_ms / 1000;
+        timeout.tv_usec = (timeout_ms % 1000) * 1000;
+        timeout_ptr = &timeout;
+    }
+    
+    int n = select(STDIN_FILENO+1, &rfds, NULL, NULL, timeout_ptr);
+    
+    if (n == 0) {
+        // Timeout occurred
+        return (InputEvt){ .type = EVT_TIMEOUT };
+    }
 
     if (n > 0 && FD_ISSET(STDIN_FILENO, &rfds)) {
         char c;

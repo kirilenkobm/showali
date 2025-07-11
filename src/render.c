@@ -72,20 +72,6 @@ static int bg_for_sequence(char c, SequenceType type) {
     }
 }
 
-// Helper function to count sequences by type
-static void count_sequence_types(SeqList *seqs, int *dna_count, int *rna_count, int *protein_count, int *unknown_count) {
-    *dna_count = *rna_count = *protein_count = *unknown_count = 0;
-    
-    for (size_t i = 0; i < seqs->count; i++) {
-        switch (seqs->items[i].type) {
-            case SEQ_DNA: (*dna_count)++; break;
-            case SEQ_RNA: (*rna_count)++; break;
-            case SEQ_PROTEIN: (*protein_count)++; break;
-            default: (*unknown_count)++; break;
-        }
-    }
-}
-
 void render_frame(ViewState *vs) {
     // re-hide cursor in case anything unhid it
     printf("\x1b[?25l");
@@ -161,19 +147,23 @@ void render_frame(ViewState *vs) {
             }
         }
         
-        // Count sequence types for display
-        int dna_count, rna_count, protein_count, unknown_count;
-        count_sequence_types(vs->seqs, &dna_count, &rna_count, &protein_count, &unknown_count);
+        // Left side: navigation info
+        char left_info[] = "(Q) Quit (J) Jump (← ↑ ↓ →) Navigate";
         
-        // Create sequence type summary
-        char type_info[100] = "";
-        if (dna_count > 0) strcat(type_info, "DNA ");
-        if (rna_count > 0) strcat(type_info, "RNA ");
-        if (protein_count > 0) strcat(type_info, "Protein ");
-        if (unknown_count > 0) strcat(type_info, "Unknown ");
+        // Right side: position info with first visible sequence
+        char right_info[100];
+        int first_visible_seq = vs->row_offset + 1;  // 1-based
+        snprintf(right_info, sizeof(right_info), "Pos:%d/%d %d/%zu seqs", 
+                 vs->col_offset + 1, max_seq_len, first_visible_seq, vs->seqs->count);
         
-        printf("(Q) Quit (J) Jump (← ↑ ↓ →) Navigate  Pos:%d/%d  [%s] %zu seqs", 
-               vs->col_offset + 1, max_seq_len, type_info, vs->seqs->count);
+        // Calculate spacing to right-align
+        int left_len = strlen(left_info);
+        int right_len = strlen(right_info);
+        int total_space = vs->cols;
+        int spacing = total_space - left_len - right_len;
+        if (spacing < 1) spacing = 1;
+        
+        printf("%s%*s%s", left_info, spacing, "", right_info);
     }
     printf("\x1b[K");  // clear to end of line for status
 

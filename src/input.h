@@ -1,6 +1,6 @@
 #pragma once
 
-typedef enum { EVT_NONE, EVT_KEY, EVT_RESIZE } EvtType;
+typedef enum { EVT_NONE, EVT_KEY, EVT_RESIZE, EVT_TIMEOUT } EvtType;
 
 typedef enum {
   ARROW_UP    = 1000,
@@ -13,3 +13,4 @@ typedef enum {
 typedef struct { EvtType type; int key; } InputEvt;
 
 InputEvt input_read(void);
+InputEvt input_read_timeout(int timeout_ms);
