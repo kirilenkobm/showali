@@ -30,13 +30,6 @@ typedef struct {
     SearchMatch *search_results; // array of match positions
     int      search_capacity;    // capacity of search_results array
     
-    // Search history (simple circular buffer)
-    char     search_history[10][64];  // last 10 searches
-    int      search_history_pos;      // current position in history
-    int      search_history_count;    // number of items in history
-    bool     search_browsing_history; // true when browsing history with arrows
-    int      search_history_idx;      // current index when browsing
-    
     // Mouse selection state
     bool     has_selection;      // true when there's an active selection
     int      select_start_row;   // start row of selection (sequence index)

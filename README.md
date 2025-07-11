@@ -29,8 +29,4 @@ make
 
 **Supported formats (auto-detected):** FASTA, MAF, PHYLIP (​.phy​), CLUSTAL/ALN (​.aln​).
 
-## Future Plans for V1
-
-1. `F` command needs some improvement
-
 ## That's pretty much it.

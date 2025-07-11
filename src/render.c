@@ -226,12 +226,24 @@ void render_frame(ViewState *vs) {
         printf("Jump to position: %s", vs->jump_buffer);
     } else if (vs->search_mode) {
         if (vs->search_matches > 0) {
-            printf("Search: %s - Match %d/%d - ←→ navigate, ↑↓ history, ESC quit", 
-                   vs->search_buffer, vs->search_current + 1, vs->search_matches);
+            // Get current match coordinates
+            SearchMatch *current_match = &vs->search_results[vs->search_current];
+            int seq_num = current_match->seq_idx + 1;  // 1-based sequence number
+            int start_pos = current_match->pos + 1;    // 1-based position
+            int end_pos = start_pos + strlen(vs->search_buffer) - 1;  // end position
+            
+            if (vs->search_matches > 100) {
+                printf("Search: %s - Too many matches, >100 seq%d:%d-%d - ←→ navigate, ESC quit", 
+                       vs->search_buffer, seq_num, start_pos, end_pos);
+            } else {
+                printf("Search: %s - Match %d/%d seq%d:%d-%d - ←→ navigate, ESC quit", 
+                       vs->search_buffer, vs->search_current + 1, vs->search_matches, 
+                       seq_num, start_pos, end_pos);
+            }
         } else if (strlen(vs->search_buffer) > 0) {
-            printf("Search: %s - No matches - ↑↓ history, ESC quit", vs->search_buffer);
+            printf("Search: %s - No matches - ESC quit", vs->search_buffer);
         } else {
-            printf("Search: %s - ↑↓ history, ESC quit", vs->search_buffer);
+            printf("Search: %s - ESC quit", vs->search_buffer);
         }
     } else if (vs->has_selection) {
         // find the maximum sequence length for position info

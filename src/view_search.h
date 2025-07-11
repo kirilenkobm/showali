@@ -8,8 +8,11 @@ void view_execute_search(ViewState *vs);
 void view_cancel_search(ViewState *vs);
 
 // Search navigation
-void view_navigate_search_history(ViewState *vs, bool up);
 void view_navigate_matches(ViewState *vs, bool next);
+
+// Search internal functions (made public for live search)
+void view_find_matches(ViewState *vs, const char *query);
+void view_jump_to_match(ViewState *vs, int match_idx);
 
 // Search match queries
 bool view_is_search_match(ViewState *vs, int seq_idx, int pos);

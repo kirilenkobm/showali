@@ -3,17 +3,12 @@
 #include <stdlib.h>
 
 // Forward declarations for static functions
-static void view_add_to_search_history(ViewState *vs, const char *query);
-static void view_find_matches(ViewState *vs, const char *query);
-static void view_jump_to_match(ViewState *vs, int match_idx);
 
 // search mode handling
 void view_start_search(ViewState *vs) {
     vs->search_mode = true;
     vs->search_pos = 0;
     vs->search_buffer[0] = '\0';
-    vs->search_browsing_history = false;
-    vs->search_history_idx = 0;
     // Clear previous results
     vs->search_matches = 0;
     vs->search_current = 0;
@@ -28,28 +23,19 @@ void view_add_search_char(ViewState *vs, char c) {
     vs->search_buffer[vs->search_pos++] = c;
     vs->search_buffer[vs->search_pos] = '\0';
     
-    // Exit history browsing mode when typing
-    vs->search_browsing_history = false;
-}
-
-static void view_add_to_search_history(ViewState *vs, const char *query) {
-    if (strlen(query) == 0) return;
+    // Live search: automatically update results as user types
+    view_find_matches(vs, vs->search_buffer);
     
-    // Don't add if it's the same as the last search
-    if (vs->search_history_count > 0) {
-        int last_idx = (vs->search_history_pos - 1 + 10) % 10;
-        if (strcmp(vs->search_history[last_idx], query) == 0) {
-            return;
-        }
+    if (vs->search_matches > 0) {
+        vs->search_current = 0;
+        // Jump to first match
+        view_jump_to_match(vs, 0);
     }
-    
-    strncpy(vs->search_history[vs->search_history_pos], query, 63);
-    vs->search_history[vs->search_history_pos][63] = '\0';
-    vs->search_history_pos = (vs->search_history_pos + 1) % 10;
-    if (vs->search_history_count < 10) vs->search_history_count++;
 }
 
-static void view_find_matches(ViewState *vs, const char *query) {
+
+
+void view_find_matches(ViewState *vs, const char *query) {
     if (strlen(query) == 0) {
         vs->search_matches = 0;
         return;
@@ -102,7 +88,7 @@ static void view_find_matches(ViewState *vs, const char *query) {
     }
 }
 
-static void view_jump_to_match(ViewState *vs, int match_idx) {
+void view_jump_to_match(ViewState *vs, int match_idx) {
     if (match_idx < 0 || match_idx >= vs->search_matches) return;
     
     SearchMatch *match = &vs->search_results[match_idx];
@@ -148,9 +134,6 @@ void view_execute_search(ViewState *vs) {
         return;
     }
     
-    // Add to history if not already there
-    view_add_to_search_history(vs, vs->search_buffer);
-    
     // Find all matches across all sequences
     view_find_matches(vs, vs->search_buffer);
     
@@ -167,30 +150,11 @@ void view_cancel_search(ViewState *vs) {
     vs->search_mode = false;
     vs->search_pos = 0;
     vs->search_buffer[0] = '\0';
-    vs->search_browsing_history = false;
     vs->search_matches = 0;
     vs->search_current = 0;
 }
 
-void view_navigate_search_history(ViewState *vs, bool up) {
-    if (vs->search_history_count == 0) return;
-    
-    if (!vs->search_browsing_history) {
-        vs->search_browsing_history = true;
-        vs->search_history_idx = (vs->search_history_pos - 1 + 10) % 10;
-    } else {
-        if (up) {
-            vs->search_history_idx = (vs->search_history_idx - 1 + 10) % 10;
-        } else {
-            vs->search_history_idx = (vs->search_history_idx + 1) % 10;
-        }
-    }
-    
-    // Copy history item to search buffer
-    strncpy(vs->search_buffer, vs->search_history[vs->search_history_idx], 63);
-    vs->search_buffer[63] = '\0';
-    vs->search_pos = strlen(vs->search_buffer);
-}
+
 
 void view_navigate_matches(ViewState *vs, bool next) {
     if (vs->search_matches == 0) return;
@@ -206,6 +170,9 @@ void view_navigate_matches(ViewState *vs, bool next) {
 
 bool view_is_search_match(ViewState *vs, int seq_idx, int pos) {
     if (vs->search_matches == 0) return false;
+    
+    // Don't highlight if too many matches (>100)
+    if (vs->search_matches > 100) return false;
     
     int query_len = strlen(vs->search_buffer);
     if (query_len == 0) return false;

@@ -1,6 +1,7 @@
 #include "app.h"
 #include "parser.h"
 #include "view.h"
+#include "view_search.h"
 #include "render.h"
 #include "input.h"
 #include "term.h"
@@ -76,12 +77,16 @@ int run_app(Args *args) {
                         if (vs.search_pos > 0) {
                             vs.search_pos--;
                             vs.search_buffer[vs.search_pos] = '\0';
-                            vs.search_browsing_history = false;
+                            
+                            // Live search: update results after backspace
+                            view_find_matches(&vs, vs.search_buffer);
+                            
+                            if (vs.search_matches > 0) {
+                                vs.search_current = 0;
+                                // Jump to first match
+                                view_jump_to_match(&vs, 0);
+                            }
                         }
-                    } else if (ev.key == ARROW_UP) {
-                        view_navigate_search_history(&vs, true);
-                    } else if (ev.key == ARROW_DOWN) {
-                        view_navigate_search_history(&vs, false);
                     } else if (ev.key == ARROW_LEFT && vs.search_matches > 0) {
                         view_navigate_matches(&vs, false);
                     } else if (ev.key == ARROW_RIGHT && vs.search_matches > 0) {
