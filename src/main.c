@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
         printf("  -h, --help       Show this help message\n");
         printf("\nControls:\n");
         printf("  Arrow keys       Navigate (hold for acceleration)\n");
+        printf("  WASD             Navigate (jump half-screen)\n");
         printf("  Q                Quit\n");
         printf("  J                Jump to position\n");
         printf("                       \n");
@@ -93,6 +94,22 @@ int main(int argc, char **argv) {
                     } else if (ev.key == ARROW_RIGHT) {
                         view_update_acceleration(&vs, ARROW_RIGHT);
                         view_scroll_right(&vs);
+                    } else if (ev.key == 'w') {
+                        // W - up, half screen
+                        view_scroll_half_screen_up(&vs);
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == 's') {
+                        // S - down, half screen
+                        view_scroll_half_screen_down(&vs);
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == 'a') {
+                        // A - left, half screen
+                        view_scroll_half_screen_left(&vs);
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == 'd') {
+                        // D - right, half screen
+                        view_scroll_half_screen_right(&vs);
+                        view_reset_acceleration(&vs);
                     } else {
                         // Reset acceleration for non-arrow keys
                         view_reset_acceleration(&vs);

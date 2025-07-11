@@ -35,8 +35,9 @@ make
 2. **`--no-color` option**  
    Disable ANSI color codes (for scripting and clean screenshots).
 
-3. **WASD navigation (fast scroll)**  
-   Jump by half-screen using WASD.
+3. ~~**WASD navigation (fast scroll)**~~
+
+   ~~Jump by half-screen using WASD.~~
 
 4. **Block select**  
    Rectangular selection of nucleotides for easy copying.

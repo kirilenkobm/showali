@@ -28,12 +28,16 @@ void view_resize(ViewState *vs) {
     int max_row_off = vs->seqs->count - content;
     if (max_row_off < 0) max_row_off = 0;
     if (vs->row_offset > max_row_off) vs->row_offset = max_row_off;
-    // optionally clamp col_offset too (so we don't scroll past the end of the longest seq)
-    // you could track max_seq_len in your model, but a quick hack is:
+    // clamp col_offset to not go past the end of the longest sequence
+    int max_seq_len = 0;
     for (size_t i = 0; i < vs->seqs->count; i++) {
-        if ((int)vs->seqs->items[i].len - (vs->cols - 4) < vs->col_offset)
-            vs->col_offset = vs->seqs->items[i].len - (vs->cols - 4);
+        if ((int)vs->seqs->items[i].len > max_seq_len) {
+            max_seq_len = (int)vs->seqs->items[i].len;
+        }
     }
+    int max_col_offset = max_seq_len - 1;  // 0-based indexing
+    if (max_col_offset < 0) max_col_offset = 0;
+    if (vs->col_offset > max_col_offset) vs->col_offset = max_col_offset;
     if (vs->col_offset < 0) vs->col_offset = 0;
 }
 
@@ -72,7 +76,28 @@ void view_scroll_up_steps(ViewState *vs, int steps) {
 
 // horizontal scroll with step size
 void view_scroll_right_steps(ViewState *vs, int steps) {
-    vs->col_offset += steps;
+    // Calculate the new position after the movement
+    int new_col_offset = vs->col_offset + steps;
+    
+    // Find the maximum sequence length to determine bounds
+    int max_seq_len = 0;
+    for (size_t i = 0; i < vs->seqs->count; i++) {
+        if ((int)vs->seqs->items[i].len > max_seq_len) {
+            max_seq_len = (int)vs->seqs->items[i].len;
+        }
+    }
+    
+    // Allow scrolling until the last character position (more permissive)
+    // This allows reaching the very end of sequences
+    int max_col_offset = max_seq_len - 1;  // 0-based indexing
+    if (max_col_offset < 0) max_col_offset = 0;
+    
+    // Apply the movement but clamp to maximum if it would go too far
+    if (new_col_offset > max_col_offset) {
+        vs->col_offset = max_col_offset;
+    } else {
+        vs->col_offset = new_col_offset;
+    }
 }
 
 void view_scroll_left_steps(ViewState *vs, int steps) {
@@ -177,4 +202,33 @@ void view_cancel_jump(ViewState *vs) {
     vs->jump_mode = false;
     vs->jump_pos = 0;
     vs->jump_buffer[0] = '\0';
+}
+
+// Half-screen movement functions for WASD navigation
+void view_scroll_half_screen_up(ViewState *vs) {
+    int content = vs->rows - 2;  // underscores + status
+    int half_screen = content / 2;
+    if (half_screen < 1) half_screen = 1;
+    view_scroll_up_steps(vs, half_screen);
+}
+
+void view_scroll_half_screen_down(ViewState *vs) {
+    int content = vs->rows - 2;  // underscores + status
+    int half_screen = content / 2;
+    if (half_screen < 1) half_screen = 1;
+    view_scroll_down_steps(vs, half_screen);
+}
+
+void view_scroll_half_screen_left(ViewState *vs) {
+    int avail_width = vs->cols - 18;  // subtract ID width and separator
+    int half_screen = avail_width / 2;
+    if (half_screen < 1) half_screen = 1;
+    view_scroll_left_steps(vs, half_screen);
+}
+
+void view_scroll_half_screen_right(ViewState *vs) {
+    int avail_width = vs->cols - 18;  // subtract ID width and separator
+    int half_screen = avail_width / 2;
+    if (half_screen < 1) half_screen = 1;
+    view_scroll_right_steps(vs, half_screen);
 }

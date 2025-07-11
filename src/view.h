@@ -51,3 +51,9 @@ void view_start_jump(ViewState *vs);
 void view_add_jump_digit(ViewState *vs, char digit);
 void view_execute_jump(ViewState *vs);
 void view_cancel_jump(ViewState *vs);
+
+// half-screen movement functions for WASD navigation
+void view_scroll_half_screen_up(ViewState *vs);
+void view_scroll_half_screen_down(ViewState *vs);
+void view_scroll_half_screen_left(ViewState *vs);
+void view_scroll_half_screen_right(ViewState *vs);

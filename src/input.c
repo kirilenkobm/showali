@@ -52,6 +52,11 @@ InputEvt input_read_timeout(int timeout_ms) {
                     }
                 }
             }
+            case 'w': case 'W': return (InputEvt){.type=EVT_KEY, .key='w'};
+            case 'a': case 'A': return (InputEvt){.type=EVT_KEY, .key='a'};
+            case 's': case 'S': return (InputEvt){.type=EVT_KEY, .key='s'};
+            case 'd': case 'D': return (InputEvt){.type=EVT_KEY, .key='d'};
+
             default: return (InputEvt){.type=EVT_KEY, .key=c};
         }
     }
