@@ -16,4 +16,21 @@ make
 # add bin/showali to your path, enjoy!
 ```
 
-That's pretty much it.
+## Future Plans
+
+1. **Additional formats support & auto-detect**  
+   Add parsers for `.aln`, `.phy` and `.maf` (and others) with automatic format detection.
+
+2. **`--no-color` option**  
+   Disable ANSI color codes (for scripting and clean screenshots).
+
+3. **WASD navigation (fast scroll)**  
+   Jump by half-screen using WASD.
+
+4. **Block select**  
+   Rectangular selection of nucleotides for easy copying.
+
+5. **`S` (Search) command (?)**  
+   In-terminal pattern search with result navigation and history, keeping the UI minimal.
+
+## That's pretty much it.
