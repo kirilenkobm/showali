@@ -38,9 +38,20 @@ void disable_raw_mode(void) {
 
 void enable_altscreen(void)  {
     printf("\x1b[?1049h\x1b[?25l");
+    // Enable mouse reporting
+    printf("\x1b[?1000h");  // Enable mouse button press/release reporting
+    printf("\x1b[?1002h");  // Enable mouse drag reporting
+    printf("\x1b[?1015h");  // Enable urxvt mouse mode
+    printf("\x1b[?1006h");  // Enable SGR mouse mode
     fflush(stdout);
 }
+
 void disable_altscreen(void) {
+    // Disable mouse reporting
+    printf("\x1b[?1006l");  // Disable SGR mouse mode
+    printf("\x1b[?1015l");  // Disable urxvt mouse mode
+    printf("\x1b[?1002l");  // Disable mouse drag reporting
+    printf("\x1b[?1000l");  // Disable mouse button press/release reporting
     printf("\x1b[?25h\x1b[?1049l\x1b[2J\x1b[H");
     fflush(stdout);  // ensure cleanup commands are sent
 }

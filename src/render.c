@@ -116,14 +116,31 @@ void render_frame(ViewState *vs) {
             int chars_printed = 0;
             int current_bg = -1;  // track current background color
             for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
+                bool is_selected = view_is_selected(vs, idx, i);
+                
                 if (!vs->no_color) {
                     int bg = bg_for_sequence(s->seq[i], s->type);
-                    if (bg != current_bg) {
-                        printf("\x1b[%dm", bg);
-                        current_bg = bg;
+                    if (is_selected) {
+                        // Use inverse video for selected characters
+                        printf("\x1b[7m");  // inverse video
+                        if (bg != current_bg) {
+                            printf("\x1b[%dm", bg);
+                            current_bg = bg;
+                        }
+                    } else {
+                        if (current_bg == -1 || bg != current_bg) {
+                            printf("\x1b[0m");  // reset first
+                            printf("\x1b[%dm", bg);
+                            current_bg = bg;
+                        }
                     }
                 }
                 putchar(s->seq[i]);
+                
+                if (is_selected && !vs->no_color) {
+                    printf("\x1b[0m");  // reset after selected character
+                    current_bg = -1;
+                }
                 chars_printed++;
             }
             if (current_bg != -1 && !vs->no_color) {
@@ -141,6 +158,40 @@ void render_frame(ViewState *vs) {
     printf("\x1b[K");  // clear entire line first
     if (vs->jump_mode) {
         printf("Jump to position: %s", vs->jump_buffer);
+    } else if (vs->has_selection) {
+        // find the maximum sequence length for position info
+        int max_seq_len = 0;
+        for (size_t i = 0; i < vs->seqs->count; i++) {
+            if ((int)vs->seqs->items[i].len > max_seq_len) {
+                max_seq_len = (int)vs->seqs->items[i].len;
+            }
+        }
+        
+        // Left side: selection status
+        char left_info[100];
+        if (vs->selecting) {
+            snprintf(left_info, sizeof(left_info), "SELECTING - 'c'/right-click to copy, ESC to cancel");
+        } else {
+            snprintf(left_info, sizeof(left_info), "SELECTED - 'c'/right-click to copy, click outside/ESC to clear");
+        }
+        
+        // Right side: position info (same as normal mode)
+        char right_info[100];
+        int first_visible_seq = vs->row_offset + 1;  // 1-based
+        snprintf(right_info, sizeof(right_info), "Pos:%d/%d %d/%zu seqs", 
+                 vs->col_offset + 1, max_seq_len, first_visible_seq, vs->seqs->count);
+        
+        // Calculate spacing for full-width right-alignment
+        int left_len = strlen(left_info);
+        int right_len = strlen(right_info);
+        
+        // For some reason, we need to subtract 1 from the spacing, otherwise it's misaligned
+        // Found with natural stupidity, not artificial intelligence.
+        int spacing = vs->cols - left_len - right_len - 1;
+        if (spacing < 0) spacing = 0;  // Don't allow negative spacing
+        
+        // Print status line with both selection status and position
+        printf("%s%*s%s", left_info, spacing, "", right_info);
     } else {
         // find the maximum sequence length
         int max_seq_len = 0;
@@ -151,7 +202,7 @@ void render_frame(ViewState *vs) {
         }
         
         // Left side: navigation info
-        char left_info[] = "(Q) Quit (J) Jump (←↑↓→/WASD) Navigate";
+        char left_info[] = "(Q) Quit (J) Jump (Mouse) Select (←↑↓→/WASD) Navigate";
         
         // Right side: position info with first visible sequence
         char right_info[100];
@@ -168,7 +219,7 @@ void render_frame(ViewState *vs) {
         int left_visual_len = left_len - 7;  // Correct for Unicode arrows
         
         int spacing = vs->cols - left_visual_len - right_len;
-        if (spacing < 1) spacing = 1;  // minimum 1 space
+        if (spacing < 0) spacing = 0;  // Don't allow negative spacing
         
         // Print status line with full-width spacing
         printf("%s%*s%s", left_info, spacing, "", right_info);

@@ -14,6 +14,14 @@ typedef struct {
     int      jump_pos;   // current position in jump buffer
     bool     no_color;   // true when colors should be disabled
     
+    // Mouse selection state
+    bool     has_selection;      // true when there's an active selection
+    int      select_start_row;   // start row of selection (sequence index)
+    int      select_start_col;   // start column of selection (base index)
+    int      select_end_row;     // end row of selection (sequence index)
+    int      select_end_col;     // end column of selection (base index)
+    bool     selecting;          // true when actively selecting (mouse drag)
+    
     // Acceleration state
     int      last_key;   // last key pressed (for detecting repeats)
     struct timespec last_key_time;  // timestamp of last key press
@@ -58,3 +66,13 @@ void view_scroll_half_screen_up(ViewState *vs);
 void view_scroll_half_screen_down(ViewState *vs);
 void view_scroll_half_screen_left(ViewState *vs);
 void view_scroll_half_screen_right(ViewState *vs);
+
+// mouse selection functions
+void view_start_mouse_selection(ViewState *vs, int row, int col);
+void view_update_mouse_selection(ViewState *vs, int row, int col);
+void view_end_mouse_selection(ViewState *vs);
+void view_clear_selection(ViewState *vs);
+void view_copy_selection(ViewState *vs);
+bool view_is_selected(ViewState *vs, int row, int col);
+bool view_is_click_in_selection(ViewState *vs, int row, int col);
+void view_screen_to_sequence_pos(ViewState *vs, int screen_x, int screen_y, int *seq_row, int *seq_col);

@@ -3,7 +3,7 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 9
-#define VERSION_PATCH 2
+#define VERSION_PATCH 3
 
 // Build version string from components
 #define STRINGIFY(x) #x

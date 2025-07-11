@@ -29,6 +29,9 @@ int main(int argc, char **argv) {
         printf("  WASD             Navigate (jump half-screen)\n");
         printf("  Q                Quit\n");
         printf("  J                Jump to position\n");
+        printf("  Mouse            Drag to select rectangular area\n");
+        printf("  Right-click      Copy selection to clipboard\n");
+        printf("  ESC              Clear selection\n");
         printf("                       \n");
         printf("Made in Berlin by Krlnk\n");
         return 0;
@@ -102,6 +105,20 @@ int main(int argc, char **argv) {
                     } else if (ev.key == 'j' || ev.key == 'J') {
                         view_start_jump(&vs);
                         view_reset_acceleration(&vs);
+                    } else if (ev.key == 27) { // ESC key
+                        if (vs.has_selection) {
+                            view_clear_selection(&vs);
+                        }
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == 3) { // Ctrl+C
+                        if (vs.has_selection) {
+                            view_copy_selection(&vs);
+                        }
+                        view_reset_acceleration(&vs);
+                    } else if ((ev.key == 'c' || ev.key == 'C') && vs.has_selection) {
+                        // 'c' key to copy when selection is active
+                        view_copy_selection(&vs);
+                        view_reset_acceleration(&vs);
                     } else if (ev.key == ARROW_UP) {
                         view_update_acceleration(&vs, ARROW_UP);
                         view_scroll_up(&vs);
@@ -133,6 +150,47 @@ int main(int argc, char **argv) {
                     } else {
                         // Reset acceleration for non-arrow keys
                         view_reset_acceleration(&vs);
+                    }
+                }
+                break;
+            case EVT_MOUSE:
+                // Handle mouse events for rectangular selection
+                if (ev.mouse_button == 0) {  // Left mouse button
+                    int seq_row, seq_col;
+                    view_screen_to_sequence_pos(&vs, ev.mouse_x, ev.mouse_y, &seq_row, &seq_col);
+                    
+                    if (ev.mouse_pressed && ev.mouse_drag) {
+                        if (!vs.selecting) {
+                            // Start new selection
+                            view_start_mouse_selection(&vs, seq_row, seq_col);
+                        } else {
+                            // Update existing selection
+                            view_update_mouse_selection(&vs, seq_row, seq_col);
+                        }
+                    } else if (ev.mouse_pressed && !ev.mouse_drag) {
+                        if (vs.has_selection) {
+                            if (view_is_click_in_selection(&vs, seq_row, seq_col)) {
+                                // Clicking within selection - could be start of new drag
+                                // Don't do anything yet, wait for drag or release
+                            } else {
+                                // Clicking outside selection - clear it
+                                view_clear_selection(&vs);
+                            }
+                        } else {
+                            // No existing selection - start new one
+                            view_start_mouse_selection(&vs, seq_row, seq_col);
+                        }
+                    } else if (ev.mouse_released) {
+                        if (vs.selecting) {
+                            // End selection
+                            view_end_mouse_selection(&vs);
+                        }
+                        // Note: We don't clear selection on release anymore
+                    }
+                } else if (ev.mouse_button == 2 && ev.mouse_pressed) {  // Right mouse button
+                    if (vs.has_selection) {
+                        // Copy selection to clipboard
+                        view_copy_selection(&vs);
                     }
                 }
                 break;
