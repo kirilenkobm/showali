@@ -15,8 +15,8 @@ If you share that pain, here’s a tool for you.
 Contributions and patches are welcome, but please respect the minimalist spirit:  
 if you really need heavyweight features, there are plenty of other tools out there.  
 
-![Screenshot](pics/v0.1.7.screenshot.png)
-*v0.1.7 screenshot*
+![Screenshot](pics/v0.9.1.screenshot.png)
+*v0.9.1 screenshot*
 
 ## How to install
 

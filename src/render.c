@@ -136,6 +136,7 @@ void render_frame(ViewState *vs) {
     printf("\x1b[K\n");  // clear to end of line
 
     // draw status on the last line
+    printf("\x1b[K");  // clear entire line first
     if (vs->jump_mode) {
         printf("Jump to position: %s", vs->jump_buffer);
     } else {
@@ -156,27 +157,20 @@ void render_frame(ViewState *vs) {
         snprintf(right_info, sizeof(right_info), "Pos:%d/%d %d/%zu seqs", 
                  vs->col_offset + 1, max_seq_len, first_visible_seq, vs->seqs->count);
         
-        // Print left info and right info with controlled spacing
+        // Calculate spacing for full-width right-alignment
         int left_len = strlen(left_info);
         int right_len = strlen(right_info);
         
-        // Print left info
-        printf("%s", left_info);
+        // Adjust for Unicode arrows: each arrow is 3 bytes but 1 visual char
+        // 4 arrows: 4×3=12 bytes, 4×1=4 visual chars, difference = 8
+        int left_visual_len = left_len - 7;  // Correct for Unicode arrows
         
-        // Calculate and print exact spacing to fill terminal width
-        int chars_printed = left_len;
-        int remaining_space = vs->cols - chars_printed - right_len;
+        int spacing = vs->cols - left_visual_len - right_len;
+        if (spacing < 1) spacing = 1;  // minimum 1 space
         
-        // Print spacing (minimum 2 spaces, but don't exceed terminal width)
-        for (int i = 0; i < remaining_space && chars_printed < vs->cols - right_len; i++) {
-            putchar(' ');
-            chars_printed++;
-        }
-        
-        // Print right info
-        printf("%s", right_info);
+        // Print status line with full-width spacing
+        printf("%s%*s%s", left_info, spacing, "", right_info);
     }
-    printf("\x1b[K");  // clear to end of line for status
 
     fflush(stdout);
 }
