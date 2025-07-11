@@ -27,17 +27,10 @@ make
 # add bin/showali to your path, enjoy!
 ```
 
-## Suppoted formats 
-
-- fasta
-- maf (beta)
-- phy (beta)
-- aln (beta)
+**Supported formats (auto-detected):** FASTA, MAF, PHYLIP (​.phy​), CLUSTAL/ALN (​.aln​).
 
 ## Future Plans for V1
 
-1. `F`command needs some improvement
-
-2. Allow selecting sequence IDs, at least visible parts
+1. `F` command needs some improvement
 
 ## That's pretty much it.
