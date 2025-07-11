@@ -78,13 +78,60 @@ static int bg_for_sequence(char c, SequenceType type) {
     }
 }
 
+// Helper function to render the ruler at the top
+static void render_ruler(ViewState *vs) {
+    int id_width = 16;
+    int separator_width = 2; // "| "
+    
+    // Print spacing to match sequence ID width
+    for (int i = 0; i < id_width; i++) {
+        putchar(' ');
+    }
+    printf("| ");
+    
+    // Calculate available space for ruler
+    int avail = vs->cols - id_width - separator_width;
+    if (avail <= 0) {
+        printf("\x1b[K\n"); // clear to end of line
+        return;
+    }
+    
+    // Generate ruler with position markers
+    for (int i = 0; i < avail; i++) {
+        int seq_pos = vs->col_offset + i + 1; // 1-based position
+        
+        if (seq_pos % 10 == 0) {
+            // Vertical pipe at every 10th position, then number
+            char pos_str[16];
+            snprintf(pos_str, sizeof(pos_str), "|%d", seq_pos);
+            
+            // Check if we have enough space to print the pipe and number
+            int pos_len = strlen(pos_str);
+            if (i + pos_len <= avail) {
+                printf("%s", pos_str);
+                i += pos_len - 1; // -1 because the loop will increment i
+            } else {
+                putchar('|'); // Just print pipe if not enough space for number
+            }
+        } else {
+            // Regular position, print space
+            putchar(' ');
+        }
+    }
+    
+    printf("\x1b[K\n"); // clear to end of line
+}
+
 void render_frame(ViewState *vs) {
     // re-hide cursor in case anything unhid it
     printf("\x1b[?25l");
     // move cursor home without clearing screen
     printf("\x1b[H");
 
-    int content = vs->rows - 2;  // leave 2 lines for status
+    // Render ruler at the top
+    render_ruler(vs);
+
+    int content = vs->rows - 3;  // leave 3 lines for ruler, separator, and status
     for (int line = 0; line < content; line++) {
         int idx = vs->row_offset + line;
         if (idx >= (int)vs->seqs->count) {

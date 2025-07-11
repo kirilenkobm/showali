@@ -112,7 +112,7 @@ static void view_jump_to_match(ViewState *vs, int match_idx) {
     vs->col_offset = match->pos;
     
     // Ensure the match is visible by centering it
-    int content_height = vs->rows - 2;  // underscores + status
+    int content_height = vs->rows - 3;  // ruler + underscores + status
     int half_screen = content_height / 2;
     
     // Center vertically

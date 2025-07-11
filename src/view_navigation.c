@@ -21,7 +21,7 @@ void view_scroll_left(ViewState *vs) {
 
 // vertical scroll with step size
 void view_scroll_down_steps(ViewState *vs, int steps) {
-    int content = vs->rows - 2;  // underscores + status
+    int content = vs->rows - 3;  // ruler + underscores + status
     int max_off = vs->seqs->count - content;
     if (max_off < 0) max_off = 0;
     
@@ -104,14 +104,14 @@ void view_reset_acceleration(ViewState *vs) {
 
 // Half-screen movement functions for WASD navigation
 void view_scroll_half_screen_up(ViewState *vs) {
-    int content = vs->rows - 2;  // underscores + status
+    int content = vs->rows - 3;  // ruler + underscores + status
     int half_screen = content / 2;
     if (half_screen < 1) half_screen = 1;
     view_scroll_up_steps(vs, half_screen);
 }
 
 void view_scroll_half_screen_down(ViewState *vs) {
-    int content = vs->rows - 2;  // underscores + status
+    int content = vs->rows - 3;  // ruler + underscores + status
     int half_screen = content / 2;
     if (half_screen < 1) half_screen = 1;
     view_scroll_down_steps(vs, half_screen);
@@ -134,10 +134,10 @@ void view_scroll_half_screen_right(ViewState *vs) {
 // Mouse selection functions
 void view_screen_to_sequence_pos(ViewState *vs, int screen_x, int screen_y, int *seq_row, int *seq_col) {
     // Convert screen coordinates to sequence row/col
-    // Screen layout: 16 chars for ID + "| " + sequence data
+    // Screen layout: ruler line + 16 chars for ID + "| " + sequence data
     
-    // Row calculation
-    *seq_row = vs->row_offset + screen_y;
+    // Row calculation - account for ruler line at top
+    *seq_row = vs->row_offset + screen_y - 1;
     
     // Column calculation - account for ID width and separator
     int id_width = 16;

@@ -40,7 +40,7 @@ ViewState view_init(SeqList *s) {
 void view_resize(ViewState *vs) {
     get_term_size(&vs->rows, &vs->cols);
     // clamp row_offset so we never drop the first line
-    int content = vs->rows - 2;  // underscores + status
+    int content = vs->rows - 3;  // ruler + underscores + status
     int max_row_off = vs->seqs->count - content;
     if (max_row_off < 0) max_row_off = 0;
     if (vs->row_offset > max_row_off) vs->row_offset = max_row_off;

@@ -38,10 +38,6 @@ make
 
 1. `F`command needs some improvement
 
-2. Some kind of ruler on top
-
-3. Allow selecting sequence IDs, at least visible parts
-
-4. Proper tests on `.aln', '.maf', and '.phy'
+2. Allow selecting sequence IDs, at least visible parts
 
 ## That's pretty much it.
