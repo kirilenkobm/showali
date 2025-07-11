@@ -32,21 +32,9 @@ make
 1. **Additional formats support & auto-detect**  
    Add parsers for `.aln`, `.phy` and `.maf` (and others) with automatic format detection.
 
-2. ~~**`--no-color` option**~~
+2. **`F` () command (?)**  
+   Minimalistic search, for now only beta.
 
-   ~~Disable ANSI color codes (for scripting and clean screenshots).~~
-
-3. ~~**WASD navigation (fast scroll)**~~
-
-   ~~Jump by half-screen using WASD.~~
-
-4. ~~**Block select**~~
-
-   ~~Rectangular selection of nucleotides for easy copying.~~
-
-5. **`S` (Search) command (?)**  
-   In-terminal pattern search with result navigation and history, keeping the UI minimal.
-
-6. Better UI for sequence ID copying (?)
+3. Better UI for sequence ID copying (?)
 
 ## That's pretty much it.

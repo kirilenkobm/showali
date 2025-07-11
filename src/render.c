@@ -117,9 +117,12 @@ void render_frame(ViewState *vs) {
             int current_bg = -1;  // track current background color
             for (int i = vs->col_offset; i < (int)s->len && chars_printed < avail; i++) {
                 bool is_selected = view_is_selected(vs, idx, i);
+                bool is_search_match = view_is_search_match(vs, idx, i);
+                bool is_current_match = view_is_current_search_match(vs, idx, i);
                 
                 if (!vs->no_color) {
                     int bg = bg_for_sequence(s->seq[i], s->type);
+                    
                     if (is_selected) {
                         // Use inverse video for selected characters
                         printf("\x1b[7m");  // inverse video
@@ -127,6 +130,16 @@ void render_frame(ViewState *vs) {
                             printf("\x1b[%dm", bg);
                             current_bg = bg;
                         }
+                    } else if (is_current_match) {
+                        // Current search match - bright yellow background with black text
+                        printf("\x1b[0m");  // reset first
+                        printf("\x1b[103;30m");  // bright yellow bg, black text
+                        current_bg = -1;  // force reset after
+                    } else if (is_search_match) {
+                        // Other search matches - yellow background with black text
+                        printf("\x1b[0m");  // reset first
+                        printf("\x1b[43;30m");  // yellow bg, black text
+                        current_bg = -1;  // force reset after
                     } else {
                         if (current_bg == -1 || bg != current_bg) {
                             printf("\x1b[0m");  // reset first
@@ -137,8 +150,8 @@ void render_frame(ViewState *vs) {
                 }
                 putchar(s->seq[i]);
                 
-                if (is_selected && !vs->no_color) {
-                    printf("\x1b[0m");  // reset after selected character
+                if ((is_selected || is_search_match || is_current_match) && !vs->no_color) {
+                    printf("\x1b[0m");  // reset after special character
                     current_bg = -1;
                 }
                 chars_printed++;
@@ -158,6 +171,15 @@ void render_frame(ViewState *vs) {
     printf("\x1b[K");  // clear entire line first
     if (vs->jump_mode) {
         printf("Jump to position: %s", vs->jump_buffer);
+    } else if (vs->search_mode) {
+        if (vs->search_matches > 0) {
+            printf("Search: %s - Match %d/%d - ←→ navigate, ↑↓ history, ESC quit", 
+                   vs->search_buffer, vs->search_current + 1, vs->search_matches);
+        } else if (strlen(vs->search_buffer) > 0) {
+            printf("Search: %s - No matches - ↑↓ history, ESC quit", vs->search_buffer);
+        } else {
+            printf("Search: %s - ↑↓ history, ESC quit", vs->search_buffer);
+        }
     } else if (vs->has_selection) {
         // find the maximum sequence length for position info
         int max_seq_len = 0;
@@ -202,7 +224,7 @@ void render_frame(ViewState *vs) {
         }
         
         // Left side: navigation info
-        char left_info[] = "(Q) Quit (J) Jump (Mouse) Select (←↑↓→/WASD) Navigate";
+        char left_info[] = "(Q) Quit (J) Jump (F) Find (Mouse) Select (←↑↓→/WASD) Navigate";
         
         // Right side: position info with first visible sequence
         char right_info[100];

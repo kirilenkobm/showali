@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
         printf("  WASD             Navigate (jump half-screen)\n");
         printf("  Q                Quit\n");
         printf("  J                Jump to position\n");
+        printf("  F                Find (beta)\n");
         printf("  Mouse            Drag to select rectangular area\n");
         printf("  Right-click      Copy selection to clipboard\n");
         printf("  ESC              Clear selection\n");
@@ -98,6 +99,32 @@ int main(int argc, char **argv) {
                         // Any other key cancels jump mode
                         view_cancel_jump(&vs);
                     }
+                                    } else if (vs.search_mode) {
+                        // In search mode, handle text input and navigation
+                        if (ev.key == ENTER) {
+                            view_execute_search(&vs);
+                        } else if (ev.key == 27) { // ESC key
+                            view_cancel_search(&vs);
+                        } else if (ev.key == 'q' || ev.key == 'Q') {
+                            // In search mode, Q doesn't quit - user needs to ESC first
+                            view_add_search_char(&vs, ev.key);
+                    } else if (ev.key == 8 || ev.key == 127) { // Backspace
+                        if (vs.search_pos > 0) {
+                            vs.search_pos--;
+                            vs.search_buffer[vs.search_pos] = '\0';
+                            vs.search_browsing_history = false;
+                        }
+                    } else if (ev.key == ARROW_UP) {
+                        view_navigate_search_history(&vs, true);
+                    } else if (ev.key == ARROW_DOWN) {
+                        view_navigate_search_history(&vs, false);
+                    } else if (ev.key == ARROW_LEFT && vs.search_matches > 0) {
+                        view_navigate_matches(&vs, false);
+                    } else if (ev.key == ARROW_RIGHT && vs.search_matches > 0) {
+                        view_navigate_matches(&vs, true);
+                    } else if (ev.key >= 32 && ev.key <= 126) { // Printable characters
+                        view_add_search_char(&vs, ev.key);
+                    }
                 } else {
                     // Normal mode - handle acceleration for arrow keys
                     if (ev.key == 'q' || ev.key == 'Q') {
@@ -131,19 +158,23 @@ int main(int argc, char **argv) {
                     } else if (ev.key == ARROW_RIGHT) {
                         view_update_acceleration(&vs, ARROW_RIGHT);
                         view_scroll_right(&vs);
-                    } else if (ev.key == 'w') {
+                    } else if (ev.key == 'w' || ev.key == 'W') {
                         // W - up, half screen
                         view_scroll_half_screen_up(&vs);
                         view_reset_acceleration(&vs);
-                    } else if (ev.key == 's') {
+                    } else if (ev.key == 's' || ev.key == 'S') {
                         // S - down, half screen
                         view_scroll_half_screen_down(&vs);
                         view_reset_acceleration(&vs);
-                    } else if (ev.key == 'a') {
+                    } else if (ev.key == 'f' || ev.key == 'F') {
+                        // F - find/search mode
+                        view_start_search(&vs);
+                        view_reset_acceleration(&vs);
+                    } else if (ev.key == 'a' || ev.key == 'A') {
                         // A - left, half screen
                         view_scroll_half_screen_left(&vs);
                         view_reset_acceleration(&vs);
-                    } else if (ev.key == 'd') {
+                    } else if (ev.key == 'd' || ev.key == 'D') {
                         // D - right, half screen
                         view_scroll_half_screen_right(&vs);
                         view_reset_acceleration(&vs);
