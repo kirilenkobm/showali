@@ -15,8 +15,8 @@ If you share that pain, here’s a tool for you.
 Contributions and patches are welcome, but please respect the minimalist spirit:  
 if you really need heavyweight features, there are plenty of other tools out there.  
 
-![Screenshot](pics/v0.9.1.screenshot.png)
-*v0.9.1 screenshot*
+![Screenshot](pics/v0.9.6.screenshot.png)
+*v0.9.6 screenshot*
 
 ## How to install
 
@@ -27,14 +27,19 @@ make
 # add bin/showali to your path, enjoy!
 ```
 
+## Suppoted formats 
+
+- fasta
+- maf (beta)
+- phy (beta)
+- aln (beta)
+
 ## Future Plans
 
-1. **Additional formats support & auto-detect**  
-   Add parsers for `.aln`, ~~`.phy`~~ and ~~`.maf`~~ (and others) with automatic format detection.
+1. **Additional formats support? (fastq?)**  
 
-2. **`F` () command (?)**  
-   Minimalistic search, for now only beta.
+2. **`F` () command needs some improvement**  
 
-3. Better UI for sequence ID copying (?)
+3. Better UI for sequence ID copying
 
 ## That's pretty much it.
