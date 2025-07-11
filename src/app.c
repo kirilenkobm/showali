@@ -159,33 +159,24 @@ int run_app(Args *args) {
                     int seq_row, seq_col;
                     view_screen_to_sequence_pos(&vs, ev.mouse_x, ev.mouse_y, &seq_row, &seq_col);
                     
-                    if (ev.mouse_pressed && ev.mouse_drag) {
-                        if (!vs.selecting) {
-                            // Start new selection
-                            view_start_mouse_selection(&vs, seq_row, seq_col);
-                        } else {
-                            // Update existing selection
+                    if (ev.mouse_drag) {
+                        // Drag event - update existing selection
+                        if (vs.selecting) {
                             view_update_mouse_selection(&vs, seq_row, seq_col);
                         }
-                    } else if (ev.mouse_pressed && !ev.mouse_drag) {
-                        if (vs.has_selection) {
-                            if (view_is_click_in_selection(&vs, seq_row, seq_col)) {
-                                // Clicking within selection - could be start of new drag
-                                // Don't do anything yet, wait for drag or release
-                            } else {
-                                // Clicking outside selection - clear it
-                                view_clear_selection(&vs);
-                            }
-                        } else {
-                            // No existing selection - start new one
-                            view_start_mouse_selection(&vs, seq_row, seq_col);
+                    } else if (ev.mouse_pressed) {
+                        // Initial press - start new selection
+                        if (vs.has_selection && !view_is_click_in_selection(&vs, seq_row, seq_col)) {
+                            // Clicking outside existing selection - clear it first
+                            view_clear_selection(&vs);
                         }
+                        // Start new selection
+                        view_start_mouse_selection(&vs, seq_row, seq_col);
                     } else if (ev.mouse_released) {
                         if (vs.selecting) {
                             // End selection
                             view_end_mouse_selection(&vs);
                         }
-                        // Note: We don't clear selection on release anymore
                     }
                 } else if (ev.mouse_button == 2 && ev.mouse_pressed) {  // Right mouse button
                     if (vs.has_selection) {

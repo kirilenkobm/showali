@@ -3,6 +3,13 @@
 #include <stdlib.h>
 
 void view_start_mouse_selection(ViewState *vs, int row, int col) {
+    if (!vs || !vs->seqs) return;  // Safety check
+    
+    // Clamp coordinates to valid ranges
+    if (row < 0) row = 0;
+    if (row >= (int)vs->seqs->count) row = (int)vs->seqs->count - 1;
+    if (col < 0) col = 0;
+    
     vs->has_selection = true;
     vs->selecting = true;
     vs->select_start_row = row;
@@ -12,7 +19,12 @@ void view_start_mouse_selection(ViewState *vs, int row, int col) {
 }
 
 void view_update_mouse_selection(ViewState *vs, int row, int col) {
-    if (!vs->selecting) return;
+    if (!vs || !vs->seqs || !vs->selecting) return;  // Safety check
+    
+    // Clamp coordinates to valid ranges
+    if (row < 0) row = 0;
+    if (row >= (int)vs->seqs->count) row = (int)vs->seqs->count - 1;
+    if (col < 0) col = 0;
     
     vs->select_end_row = row;
     vs->select_end_col = col;
@@ -115,7 +127,7 @@ void view_copy_selection(ViewState *vs) {
 }
 
 bool view_is_selected(ViewState *vs, int row, int col) {
-    if (!vs->has_selection) return false;
+    if (!vs || !vs->seqs || !vs->has_selection) return false;
     
     // Determine selection bounds
     int start_row = (vs->select_start_row < vs->select_end_row) ? vs->select_start_row : vs->select_end_row;
@@ -127,7 +139,7 @@ bool view_is_selected(ViewState *vs, int row, int col) {
 }
 
 bool view_is_click_in_selection(ViewState *vs, int row, int col) {
-    if (!vs->has_selection) return false;
+    if (!vs || !vs->seqs || !vs->has_selection) return false;
     
     // Use the same logic as view_is_selected
     return view_is_selected(vs, row, col);

@@ -153,4 +153,14 @@ void view_screen_to_sequence_pos(ViewState *vs, int screen_x, int screen_y, int 
     if (*seq_row < 0) *seq_row = 0;
     if (*seq_row >= (int)vs->seqs->count) *seq_row = (int)vs->seqs->count - 1;
     if (*seq_col < 0) *seq_col = 0;
+    
+    // Find max sequence length and clamp column
+    int max_seq_len = 0;
+    for (size_t i = 0; i < vs->seqs->count; i++) {
+        if ((int)vs->seqs->items[i].len > max_seq_len) {
+            max_seq_len = (int)vs->seqs->items[i].len;
+        }
+    }
+    if (*seq_col >= max_seq_len) *seq_col = max_seq_len - 1;
+    if (max_seq_len == 0) *seq_col = 0;  // Handle empty sequences
 } 
