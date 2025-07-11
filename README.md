@@ -34,12 +34,14 @@ make
 - phy (beta)
 - aln (beta)
 
-## Future Plans
+## Future Plans for V1
 
-1. **Additional formats support? (fastq?)**  
+1. `F`command needs some improvement
 
-2. **`F` () command needs some improvement**  
+2. Some kind of ruler on top
 
-3. Better UI for sequence ID copying
+3. Allow selecting sequence IDs, at least visible parts
+
+4. Proper tests on `.aln', '.maf', and '.phy'
 
 ## That's pretty much it.

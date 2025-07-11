@@ -52,60 +52,9 @@ typedef struct {
     int      accel_step;  // current step size for scrolling
 } ViewState;
 
-// initialize view state from parsed sequences
-ViewState view_init(SeqList *s);
-
-// adjust to a terminal resize
-void view_resize(ViewState *vs);
-
-// vertical scrolling
-void view_scroll_up(ViewState *vs);
-void view_scroll_down(ViewState *vs);
-
-// horizontal scrolling
-void view_scroll_left(ViewState *vs);
-void view_scroll_right(ViewState *vs);
-
-// vertical scrolling with step size
-void view_scroll_up_steps(ViewState *vs, int steps);
-void view_scroll_down_steps(ViewState *vs, int steps);
-
-// horizontal scrolling with step size
-void view_scroll_left_steps(ViewState *vs, int steps);
-void view_scroll_right_steps(ViewState *vs, int steps);
-
-// acceleration handling
-void view_update_acceleration(ViewState *vs, int key);
-void view_reset_acceleration(ViewState *vs);
-
-// jump mode handling
-void view_start_jump(ViewState *vs);
-void view_add_jump_digit(ViewState *vs, char digit);
-void view_execute_jump(ViewState *vs);
-void view_cancel_jump(ViewState *vs);
-
-// search mode handling
-void view_start_search(ViewState *vs);
-void view_add_search_char(ViewState *vs, char c);
-void view_execute_search(ViewState *vs);
-void view_cancel_search(ViewState *vs);
-void view_navigate_search_history(ViewState *vs, bool up);
-void view_navigate_matches(ViewState *vs, bool next);
-bool view_is_search_match(ViewState *vs, int seq_idx, int pos);
-bool view_is_current_search_match(ViewState *vs, int seq_idx, int pos);
-
-// half-screen movement functions for WASD navigation
-void view_scroll_half_screen_up(ViewState *vs);
-void view_scroll_half_screen_down(ViewState *vs);
-void view_scroll_half_screen_left(ViewState *vs);
-void view_scroll_half_screen_right(ViewState *vs);
-
-// mouse selection functions
-void view_start_mouse_selection(ViewState *vs, int row, int col);
-void view_update_mouse_selection(ViewState *vs, int row, int col);
-void view_end_mouse_selection(ViewState *vs);
-void view_clear_selection(ViewState *vs);
-void view_copy_selection(ViewState *vs);
-bool view_is_selected(ViewState *vs, int row, int col);
-bool view_is_click_in_selection(ViewState *vs, int row, int col);
-void view_screen_to_sequence_pos(ViewState *vs, int screen_x, int screen_y, int *seq_row, int *seq_col);
+// Include all the decomposed modules
+#include "view_state.h"
+#include "view_navigation.h"
+#include "view_search.h"
+#include "view_selection.h"
+#include "view_modes.h"
