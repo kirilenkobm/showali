@@ -4,8 +4,18 @@
 
 Sometimes you just want to run `showali my_alignment.fasta` and see your sequences.
 
+## Purpose & Disclaimer
+
+I made `showali` out of pure personal need: a minimalist way to quickly glance at multiple sequence alignments right in my terminal.  
+This is _not_ a full-featured MSA suite. It does exactly what I needed and nothing more.  
+No GUI, no file wrangling—just open & go.  
+If you share that pain, great—here’s a tool for you.  
+
+Contributions and patches are welcome, but please respect the minimalist spirit:  
+if you really need heavyweight features, there are plenty of other tools out there.  
+
 ![Screenshot](pics/v0.1.7.screenshot.png)
-*v0.1.5 screenshot*
+*v0.1.7 screenshot*
 
 ## How to install
 
