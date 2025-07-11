@@ -4,6 +4,9 @@
 
 // map bases -> ANSI background codes for DNA/RNA
 static int bg_for_nucleotide(char c) {
+    // Convert to uppercase for case-insensitive matching
+    if (c >= 'a' && c <= 'z') c -= 32;
+    
     switch (c) {
       case 'A': return 42;  // green
       case 'T': return 41;  // red
@@ -19,6 +22,9 @@ static int bg_for_nucleotide(char c) {
 // map amino acids -> ANSI background codes for proteins
 // Based on standard biochemical properties and Clustal coloring scheme
 static int bg_for_amino_acid(char c) {
+    // Convert to uppercase for case-insensitive matching
+    if (c >= 'a' && c <= 'z') c -= 32;
+    
     switch (c) {
       // Small nonpolar (Ala, Gly, Pro, Val) - light colors
       case 'A': return 47;   // white
