@@ -3,7 +3,7 @@
 #include <string.h>
 #include "term.h"
 #include "input.h"
-#include "parser_fasta.h"
+#include "parser.h"
 #include "view.h"
 #include "render.h"
 #include "version.h"
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     
     // Handle help flag
     if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
-        printf("Usage: %s [options] <file.fasta>\n", argv[0]);
+        printf("Usage: %s [options] <alignment_file>\n", argv[0]);
         printf("Options:\n");
         printf("  -v, --version    Show version information\n");
         printf("  -h, --help       Show this help message\n");
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
             filename = argv[i];
         } else {
             fprintf(stderr, "Error: Too many arguments\n");
-            fprintf(stderr, "Usage: %s [options] <file.fasta>\n", argv[0]);
+            fprintf(stderr, "Usage: %s [options] <alignment_file>\n", argv[0]);
             fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
             return 1;
         }
@@ -57,17 +57,35 @@ int main(int argc, char **argv) {
     
     if (filename == NULL) {
         fprintf(stderr, "Error: No input file specified\n");
-        fprintf(stderr, "Usage: %s [options] <file.fasta>\n", argv[0]);
+        fprintf(stderr, "Usage: %s [options] <alignment_file>\n", argv[0]);
         fprintf(stderr, "Try '%s --help' for more information.\n", argv[0]);
         return 1;
     }
 
-    // 1) load sequences
-    SeqList *seqs = parse_fasta(filename);
-    if (!seqs) {
-        fprintf(stderr, "Failed to parse FASTA file '%s'\n", filename);
+    // 1) load sequences with auto-detection
+    ParseResult *result = parse_alignment(filename);
+    if (!result || !result->sequences) {
+        if (result && result->error_message) {
+            fprintf(stderr, "Failed to parse alignment file '%s': %s\n", filename, result->error_message);
+        } else {
+            fprintf(stderr, "Failed to parse alignment file '%s'\n", filename);
+        }
+        if (result) {
+            free_parse_result(result);
+        }
         return 1;
     }
+    
+    SeqList *seqs = result->sequences;
+    AlignmentFormat format = result->format;
+    
+    // Print detected format info
+    printf("Detected format: %s\n", format_to_string(format));
+    printf("Loaded %zu sequences\n", seqs->count);
+    
+    // Don't free result->sequences since we're using it
+    result->sequences = NULL;
+    free_parse_result(result);
 
     // 2) init terminal (alt-screen, raw mode, SIGWINCH)
     enable_raw_mode();
