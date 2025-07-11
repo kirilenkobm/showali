@@ -23,6 +23,7 @@ if you really need heavyweight features, there are plenty of other tools out the
 git clone git@github.com:kirilenkobm/showali.git
 cd showali
 make
+./bin/showali test/test.fa
 # add bin/showali to your path, enjoy!
 ```
 
