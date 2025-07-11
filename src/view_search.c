@@ -18,7 +18,10 @@ void view_add_search_char(ViewState *vs, char c) {
     if (!vs->search_mode) return;
     
     // don't overflow buffer
-    if (vs->search_pos >= 63) return;
+    if (vs->search_pos >= 63) {
+        // Buffer is full, ignore additional characters
+        return;
+    }
     
     vs->search_buffer[vs->search_pos++] = c;
     vs->search_buffer[vs->search_pos] = '\0';
@@ -41,6 +44,21 @@ void view_find_matches(ViewState *vs, const char *query) {
         return;
     }
     
+    // Safety check: prevent overly broad wildcard searches
+    int query_len = strlen(query);
+    int non_wildcard_chars = 0;
+    for (int i = 0; i < query_len; i++) {
+        if (query[i] != '*') {
+            non_wildcard_chars++;
+        }
+    }
+    
+    // Require at least one non-wildcard character to prevent explosion
+    if (non_wildcard_chars == 0) {
+        vs->search_matches = 0;
+        return;
+    }
+    
     // Allocate initial capacity
     if (vs->search_results == NULL) {
         vs->search_capacity = 100;
@@ -48,7 +66,9 @@ void view_find_matches(ViewState *vs, const char *query) {
     }
     
     vs->search_matches = 0;
-    int query_len = strlen(query);
+    
+    // For very long searches, use a more aggressive limit to maintain performance
+    int max_matches = (query_len > 40) ? 1000 : 10000;
     
     // Search through all sequences
     for (size_t seq_idx = 0; seq_idx < vs->seqs->count; seq_idx++) {
@@ -58,10 +78,15 @@ void view_find_matches(ViewState *vs, const char *query) {
         for (int pos = 0; pos <= (int)seq->len - query_len; pos++) {
             bool match = true;
             
-            // Check if query matches at this position (case-insensitive)
+            // Check if query matches at this position (case-insensitive with wildcard support)
             for (int i = 0; i < query_len; i++) {
                 char seq_char = seq->seq[pos + i];
                 char query_char = query[i];
+                
+                // Wildcard '*' matches any character
+                if (query_char == '*') {
+                    continue;  // Always matches
+                }
                 
                 // Convert to uppercase for comparison
                 if (seq_char >= 'a' && seq_char <= 'z') seq_char -= 32;
@@ -83,6 +108,11 @@ void view_find_matches(ViewState *vs, const char *query) {
                 vs->search_results[vs->search_matches].seq_idx = seq_idx;
                 vs->search_results[vs->search_matches].pos = pos;
                 vs->search_matches++;
+                
+                // Safety limit to prevent excessive matches (lower limit for very long searches)
+                if (vs->search_matches >= max_matches) {
+                    return;
+                }
             }
         }
     }

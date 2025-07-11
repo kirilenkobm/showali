@@ -225,23 +225,49 @@ void render_frame(ViewState *vs) {
     if (vs->jump_mode) {
         printf("Jump to position: %s", vs->jump_buffer);
     } else if (vs->search_mode) {
+        int search_len = strlen(vs->search_buffer);
+        
         if (vs->search_matches > 0) {
             // Get current match coordinates
             SearchMatch *current_match = &vs->search_results[vs->search_current];
             int seq_num = current_match->seq_idx + 1;  // 1-based sequence number
             int start_pos = current_match->pos + 1;    // 1-based position
-            int end_pos = start_pos + strlen(vs->search_buffer) - 1;  // end position
+            int end_pos = start_pos + search_len - 1;  // end position
             
             if (vs->search_matches > 100) {
-                printf("Search: %s - Too many matches, >100 seq%d:%d-%d - ←→ navigate, ESC quit", 
-                       vs->search_buffer, seq_num, start_pos, end_pos);
+                if (search_len >= 63) {
+                    printf("Search: %s [LIMIT] - Too many matches, >100 seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, seq_num, start_pos, end_pos);
+                } else if (search_len >= 50) {
+                    printf("Search: %s [%d/63] - Too many matches, >100 seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, search_len, seq_num, start_pos, end_pos);
+                } else {
+                    printf("Search: %s - Too many matches, >100 seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, seq_num, start_pos, end_pos);
+                }
             } else {
-                printf("Search: %s - Match %d/%d seq%d:%d-%d - ←→ navigate, ESC quit", 
-                       vs->search_buffer, vs->search_current + 1, vs->search_matches, 
-                       seq_num, start_pos, end_pos);
+                if (search_len >= 63) {
+                    printf("Search: %s [LIMIT] - Match %d/%d seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, vs->search_current + 1, vs->search_matches, 
+                           seq_num, start_pos, end_pos);
+                } else if (search_len >= 50) {
+                    printf("Search: %s [%d/63] - Match %d/%d seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, search_len, vs->search_current + 1, vs->search_matches, 
+                           seq_num, start_pos, end_pos);
+                } else {
+                    printf("Search: %s - Match %d/%d seq%d:%d-%d - ←→ navigate, ESC quit", 
+                           vs->search_buffer, vs->search_current + 1, vs->search_matches, 
+                           seq_num, start_pos, end_pos);
+                }
             }
-        } else if (strlen(vs->search_buffer) > 0) {
-            printf("Search: %s - No matches - ESC quit", vs->search_buffer);
+        } else if (search_len > 0) {
+            if (search_len >= 63) {
+                printf("Search: %s [LIMIT] - No matches - ESC quit", vs->search_buffer);
+            } else if (search_len >= 50) {
+                printf("Search: %s [%d/63] - No matches - ESC quit", vs->search_buffer, search_len);
+            } else {
+                printf("Search: %s - No matches - ESC quit", vs->search_buffer);
+            }
         } else {
             printf("Search: %s - ESC quit", vs->search_buffer);
         }
