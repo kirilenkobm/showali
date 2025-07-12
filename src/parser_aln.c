@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <strings.h>
 #include "parser_fasta.h"
 
 #define MAX_NAME_LENGTH 256

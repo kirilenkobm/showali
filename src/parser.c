@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <strings.h>
 #include "parser.h"
 
 // Helper function to read first few lines of a file for format detection

@@ -7,6 +7,11 @@
 #include <signal.h>    // for SIGWINCH & signal()
 #include <time.h>      // for clock_gettime
 
+// Define SIGWINCH if not defined (macOS/BSD systems)
+#ifndef SIGWINCH
+#define SIGWINCH 28
+#endif
+
 static struct termios orig;
 static volatile sig_atomic_t resized = 0;
 

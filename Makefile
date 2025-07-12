@@ -1,5 +1,5 @@
 CC      := cc
-CFLAGS  := -Wall -Wextra -std=c17
+CFLAGS  := -Wall -Wextra -std=c17 -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE -D_BSD_SOURCE
 SRCDIR  := src
 OBJDIR  := build
 BINDIR  := bin
