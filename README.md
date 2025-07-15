@@ -1,6 +1,7 @@
 # Showali – TUI alignment viewer
 
 ![Made with Cursor](https://img.shields.io/badge/Made%20with-Cursor-0066cc?style=flat&logo=cursor&logoColor=white)
+[![install with bioconda](https://img.shields.io/conda/vn/bioconda/showali.svg?label=bioconda)](https://anaconda.org/bioconda/showali)
 
 Sometimes you just want to run `showali my_alignment.fasta` and see your sequences.
 
@@ -18,6 +19,14 @@ if you really need heavyweight features, there are plenty of other tools out the
 *v1.0.0 screenshot*
 
 ## How to install
+
+Option 1: via Bioconda
+
+```bash
+conda install -c bioconda showali
+```
+
+Option 2: build from source
 
 ```bash
 git clone git@github.com:kirilenkobm/showali.git
